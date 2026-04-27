@@ -448,5 +448,17 @@ def main():
     csv = st.session_state.df.to_csv(index=False).encode('utf-8')
     st.sidebar.download_button("📥 Export CSV to Phone", data=csv, file_name="BSA_Networking_Final.csv")
 
+if st.sidebar.button("Reset to Full Attendee List"):
+    if os.path.exists(STORAGE_FILE):
+        os.remove(STORAGE_FILE)
+    st.session_state.df = pd.DataFrame(ATTENDEE_DATA)
+    # Re-apply the formatting fixes
+    for col in ['To Speak', 'Met', 'Follow Up']:
+        st.session_state.df[col] = False
+    st.session_state.df['Notes'] = ""
+    st.session_state.df['Notes'] = st.session_state.df['Notes'].astype(str)
+    save_data(st.session_state.df)
+    st.rerun()
+
 if __name__ == "__main__":
     main()
