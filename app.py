@@ -96,7 +96,7 @@ ATTENDEE_DATA = [
     {"First Name": "Sarah", "Last Name": "Harrison CB MBE", "Job Title": "Chief Executive", "Organisation": "Building Societies Association"},
     {"First Name": "Katie", "Last Name": "Wise", "Job Title": "Channels Manager", "Organisation": "Building Societies Association"},
     {"First Name": "Georgia", "Last Name": "Elliott", "Job Title": "Policy Analyst", "Organisation": "Building Societies Association"},
-    {"First Name": "Debbie", "Enever", "Job Title": "Head of External Affairs", "Organisation": "Building Societies Association"},
+    {"First Name": "Debbie", "Last Name": "Enever", "Job Title": "Head of External Affairs", "Organisation": "Building Societies Association"},
     {"First Name": "Tanya", "Last Name": "Jackson", "Job Title": "External Affairs", "Organisation": "Building Societies Association"},
     {"First Name": "Paul", "Last Name": "Broadhead", "Job Title": "Head of Mortgage and Housing Policy", "Organisation": "Building Societies Association"},
     {"First Name": "Joseph", "Last Name": "Thompson", "Job Title": "Economist", "Organisation": "Building Societies Association"},
