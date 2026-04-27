@@ -374,25 +374,34 @@ ATTENDEE_DATA = [
     {"First Name": "Trudi", "Last Name": "Flanagan", "Job Title": "Chief Executive Officer", "Organisation": "Zanoo"},
     {"First Name": "Jessica", "Last Name": "Flanagan", "Job Title": "Chief Operating Officer", "Organisation": "Zanoo"}
 ]
-STORAGE_FILE = "networking_progress_v1.csv"
+
+# Standardised storage file (v4 ensures a fresh start with correct columns)
+STORAGE_FILE = "networking_v4.csv"
 
 def load_data():
     if os.path.exists(STORAGE_FILE):
         try:
             df = pd.read_csv(STORAGE_FILE)
-            # Force Notes to string to prevent TypeError on mobile input
+            # Standardise all column names to prevent KeyErrors
+            required_cols = ['Speak To', 'Spoken To', 'Follow Up']
+            for col in required_cols:
+                if col not in df.columns:
+                    df[col] = False
+            if 'Notes' not in df.columns:
+                df['Notes'] = ""
+            
+            # Force Notes to string type for mobile input stability
             df['Notes'] = df['Notes'].fillna("").astype(str)
             return df
         except Exception:
             pass
     
-    # If no file exists, create new DataFrame from ATTENDEE_DATA
+    # Initialization from code list
     df = pd.DataFrame(ATTENDEE_DATA)
-    df['To Speak'] = False
-    df['Met'] = False
+    df['Speak To'] = False
+    df['Spoken To'] = False
     df['Follow Up'] = False
     df['Notes'] = ""
-    # Explicitly set the dtype for the Notes column
     df['Notes'] = df['Notes'].astype(str)
     return df
 
@@ -405,10 +414,11 @@ def main():
     if 'df' not in st.session_state:
         st.session_state.df = load_data()
 
-    st.title("💼 BSA 2026 Networking")
+    st.title("🤝 Networking Tracker")
+    st.caption("BSA Annual Conference 2026")
     
-    # Persistent Search
-    search = st.text_input("Search Name, Role, or Organisation", placeholder="e.g. CRO, Yorkshire, Treasury")
+    # Persistent Search Interface
+    search = st.text_input("Filter by Name, Role, or Organisation", placeholder="e.g. CRO, Bank of England")
     
     mask = (
         st.session_state.df['First Name'].str.contains(search, case=False) |
@@ -418,35 +428,35 @@ def main():
     )
     filtered = st.session_state.df[mask]
 
-    # Mobile optimized display
+    # Interaction List
     for idx, row in filtered.iterrows():
-        # Using a clean format for the expander title
         label = f"{row['First Name']} {row['Last Name']} ({row['Organisation']})"
         with st.expander(label):
             st.write(f"**Role:** {row['Job Title']}")
             
+            # Action Flags
             c1, c2, c3 = st.columns(3)
-            # We update session state immediately on change
+            # Use standardised names across all logic
             st.session_state.df.at[idx, 'Speak To'] = c1.checkbox("Target", value=row['Speak To'], key=f"s_{idx}")
             st.session_state.df.at[idx, 'Spoken To'] = c2.checkbox("Met", value=row['Spoken To'], key=f"m_{idx}")
             st.session_state.df.at[idx, 'Follow Up'] = c3.checkbox("Follow", value=row['Follow Up'], key=f"f_{idx}")
             
             note_val = str(row['Notes']) if pd.notna(row['Notes']) else ""
-            st.session_state.df.at[idx, 'Notes'] = st.text_area("Notes", value=note_val, key=f"n_{idx}")
+            st.session_state.df.at[idx, 'Notes'] = st.text_area("Interaction Notes", value=note_val, key=f"n_{idx}")
             
-            # Save automatically whenever an entry is modified
+            # Save data immediately when interaction is recorded
             save_data(st.session_state.df)
 
-    # Summary and Export in Sidebar
-    st.sidebar.header("Progress Tracker")
+    # Professional Summary View
+    st.sidebar.header("Networking Metrics")
     targets = st.session_state.df['Speak To'].sum()
     met = st.session_state.df['Spoken To'].sum()
-    st.sidebar.metric("Key Targets", targets)
-    st.sidebar.metric("Met", met)
+    st.sidebar.metric("Priority Targets", targets)
+    st.sidebar.metric("Conversations Completed", met)
     
     st.sidebar.divider()
-    csv = st.session_state.df.to_csv(index=False).encode('utf-8')
-    st.sidebar.download_button("📥 Export CSV to Phone", data=csv, file_name="BSA_Networking_Final.csv")
+    csv_data = st.session_state.df.to_csv(index=False).encode('utf-8')
+    st.sidebar.download_button("📤 Export Tracker to CSV", data=csv_data, file_name="BSA_Networking_Final.csv")
 
 if __name__ == "__main__":
     main()
