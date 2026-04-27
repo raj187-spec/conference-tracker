@@ -378,11 +378,22 @@ STORAGE_FILE = "networking_progress.csv"
 
 def load_data():
     if os.path.exists(STORAGE_FILE):
-        return pd.read_csv(STORAGE_FILE)
+        try:
+            df = pd.read_csv(STORAGE_FILE)
+            # Force Notes to string to prevent TypeError on mobile input
+            df['Notes'] = df['Notes'].fillna("").astype(str)
+            return df
+        except Exception:
+            pass
+    
+    # If no file exists, create new DataFrame from ATTENDEE_DATA
     df = pd.DataFrame(ATTENDEE_DATA)
-    for col in ['Speak To', 'Spoken To', 'Follow Up']:
-        df[col] = False
+    df['To Speak'] = False
+    df['Met'] = False
+    df['Follow Up'] = False
     df['Notes'] = ""
+    # Explicitly set the dtype for the Notes column
+    df['Notes'] = df['Notes'].astype(str)
     return df
 
 def save_data(df):
